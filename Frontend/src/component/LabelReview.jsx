@@ -36,7 +36,7 @@ const LabelReview = () => {
       const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
       if (!existingScript) {
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initReviewMap`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&callback=initReviewMap`;
         script.async = true;
         script.defer = true;
         window.initReviewMap = () => {
@@ -268,7 +268,7 @@ const LabelReview = () => {
   };
 
   const getMapURL = (lat, lng) => {
-    return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=15&size=400x300&markers=color:red%7C${lat},${lng}&key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg`;
+    return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=15&size=400x300&markers=color:red%7C${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
   };
 
   if (loading) {

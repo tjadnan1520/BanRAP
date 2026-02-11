@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { travellerAPI } from '../utils/api.js';
 import '../styles/SafetyMap.css';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg';
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const SafetyMap = ({ onClose }) => {
   const mapRef = useRef(null);
