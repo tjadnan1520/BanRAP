@@ -1,0 +1,18 @@
+footer {
+  width: 100%;
+  background: #222;
+  color: #fff;
+  text-align: center;
+  padding: 1rem 0;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+  scroll-margin-top: 70px;
+}
+.fb {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.fp {
+  margin: 0;
+  font-size: 1rem;
+}

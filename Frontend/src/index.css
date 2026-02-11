@@ -1,0 +1,102 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body { 
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+
+.card { 
+  float:left;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-right:10px;
+  border: 1px solid;
+  border-radius: 10px;
+  max-width: 200px;
+  text-align: center;
+  padding: 10px;
+  display: inline-block;
+  box-shadow: 5px 5px rgb(146, 243, 222);
+}
+
+.card-section {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  margin: 20px auto;
+  width: 80%;
+  overflow: auto;
+  box-shadow: 0 0 15px rgb(130, 132, 243);   
+}
+
+
+.card-container {
+  overflow: auto;
+  padding: 10px;
+
+}
+
+.card2 {
+  float: right;
+  border: 1px solid;
+  border-radius: 10px;
+  max-width: 250px;
+  text-align: center;
+  padding: 10px;
+  margin-left: 20px;
+  box-shadow: 5px 5px rgb(169, 231, 247);
+}
+
+.text {
+  text-align:center;
+  padding:100px;
+}
+
+
+/* Old navbar styles removed - using Header.css instead */
+
+.fp{ 
+  font-size: large;
+  text-align: center;
+}
+
+.fb{ 
+  background-color: rgb(123, 187, 243);
+  height:50px;
+  width:content;
+  padding:10px;
+}
+
+.ci{ 
+  height:200px;
+  width: 150px;
+}
+.title{ 
+  font-weight: bolder;
+}

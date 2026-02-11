@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BanRAP - Road Safety Assessment API</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>BanRAP API Testing</h1>
+      <p>Road Safety Assessment Program - API Test Dashboard</p>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-btn active" onclick="showTab('auth')">Authentication</button>
+      <button class="tab-btn" onclick="showTab('traveller')">Traveller</button>
+      <button class="tab-btn" onclick="showTab('annotator')">Annotator</button>
+      <button class="tab-btn" onclick="showTab('admin')">Admin</button>
+    </nav>
+
+    <main>
+      <!-- Authentication Tab -->
+      <section id="auth" class="tab-content active">
+        <div class="card">
+          <h2>User Registration</h2>
+          <form id="registerForm">
+            <input type="text" id="regName" placeholder="Full Name" required>
+            <input type="email" id="regEmail" placeholder="Email" required>
+            <input type="tel" id="regPhone" placeholder="Phone Number" required>
+            <select id="regRole" required>
+              <option value="">Select Role</option>
+              <option value="TRAVELLER">Traveller</option>
+              <option value="ANNOTATOR">Annotator</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+            <input type="password" id="regPassword" placeholder="Password (min 8 chars, uppercase, lowercase, numbers)" required>
+            <input type="password" id="regConfirmPassword" placeholder="Confirm Password" required>
+            <button type="submit">Register</button>
+          </form>
+          <div id="registerResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>User Login</h2>
+          <form id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Email" required>
+            <input type="password" id="loginPassword" placeholder="Password" required>
+            <button type="submit">Login</button>
+          </form>
+          <div id="loginResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Forgot Password</h2>
+          <form id="forgotForm">
+            <input type="email" id="forgotEmail" placeholder="Email" required>
+            <button type="submit">Send OTP</button>
+          </form>
+          <div id="forgotResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Reset Password</h2>
+          <form id="resetForm">
+            <input type="email" id="resetEmail" placeholder="Email" required>
+            <input type="text" id="resetOTP" placeholder="OTP" required>
+            <input type="password" id="resetPassword" placeholder="New Password" required>
+            <input type="password" id="resetConfirmPassword" placeholder="Confirm Password" required>
+            <button type="submit">Reset Password</button>
+          </form>
+          <div id="resetResult" class="result"></div>
+        </div>
+      </section>
+
+      <!-- Traveller Tab -->
+      <section id="traveller" class="tab-content">
+        <div class="card">
+          <h2>Traveller Dashboard</h2>
+          <input type="text" id="travellerToken" placeholder="JWT Token" required>
+          <button onclick="getTravellerDashboard()">Get Dashboard</button>
+          <div id="travellerDashboardResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Traveller Map</h2>
+          <input type="text" id="travellerToken2" placeholder="JWT Token" required>
+          <button onclick="getTravellerMap()">Get Map Data</button>
+          <div id="travellerMapResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Get Route</h2>
+          <input type="text" id="travellerToken3" placeholder="JWT Token" required>
+          <button onclick="getTravellerRoute()">Get Route</button>
+          <div id="travellerRouteResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Submit Feedback</h2>
+          <input type="text" id="travellerToken4" placeholder="JWT Token" required>
+          <input type="text" id="feedbackRoadId" placeholder="Road ID" required>
+          <textarea id="feedbackText" placeholder="Feedback Message"></textarea>
+          <select id="feedbackRating">
+            <option value="">Rating</option>
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Fair</option>
+            <option value="3">3 - Good</option>
+            <option value="4">4 - Very Good</option>
+            <option value="5">5 - Excellent</option>
+          </select>
+          <button onclick="submitTravellerFeedback()">Submit Feedback</button>
+          <div id="feedbackResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Get Notifications</h2>
+          <input type="text" id="travellerToken5" placeholder="JWT Token" required>
+          <button onclick="getTravellerNotifications()">Get Notifications</button>
+          <div id="notificationsResult" class="result"></div>
+        </div>
+      </section>
+
+      <!-- Annotator Tab -->
+      <section id="annotator" class="tab-content">
+        <div class="card">
+          <h2>Annotator Dashboard</h2>
+          <input type="text" id="annotatorToken" placeholder="JWT Token" required>
+          <button onclick="getAnnotatorDashboard()">Get Dashboard</button>
+          <div id="annotatorDashboardResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Select Coordinates for Labeling</h2>
+          <input type="text" id="annotatorToken2" placeholder="JWT Token" required>
+          <input type="text" id="roadId" placeholder="Road ID" required>
+          <button onclick="selectCoordinates()">Select Coordinates</button>
+          <div id="coordinatesResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>🏷️ Create Label</h2>
+          <input type="text" id="annotatorToken3" placeholder="JWT Token" required>
+          <input type="text" id="labelRoadId" placeholder="Road ID" required>
+          <input type="number" id="latitude" placeholder="Latitude" step="0.0001" required>
+          <input type="number" id="longitude" placeholder="Longitude" step="0.0001" required>
+          <textarea id="labelDescription" placeholder="Label Description"></textarea>
+          <input type="text" id="labelType" placeholder="Label Type (e.g., pothole, accident)" required>
+          <button onclick="createLabel()">Create Label</button>
+          <div id="labelResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Submit Annotator Feedback</h2>
+          <input type="text" id="annotatorToken4" placeholder="JWT Token" required>
+          <input type="text" id="annotatorFeedbackRoadId" placeholder="Road ID" required>
+          <textarea id="annotatorFeedbackText" placeholder="Feedback Message"></textarea>
+          <button onclick="submitAnnotatorFeedback()">Submit Feedback</button>
+          <div id="annotatorFeedbackResult" class="result"></div>
+        </div>
+      </section>
+
+      <!-- Admin Tab -->
+      <section id="admin" class="tab-content">
+        <div class="card">
+          <h2>Admin Dashboard</h2>
+          <input type="text" id="adminToken" placeholder="JWT Token" required>
+          <button onclick="getAdminDashboard()">Get Dashboard</button>
+          <div id="adminDashboardResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Check Feedback</h2>
+          <input type="text" id="adminToken2" placeholder="JWT Token" required>
+          <button onclick="checkFeedback()">Check Feedback</button>
+          <div id="checkFeedbackResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Assign Feedback to Annotator</h2>
+          <input type="text" id="adminToken3" placeholder="JWT Token" required>
+          <input type="text" id="feedbackId" placeholder="Feedback ID" required>
+          <input type="email" id="annotatorEmail" placeholder="Annotator Email" required>
+          <button onclick="assignFeedback()">Assign Feedback</button>
+          <div id="assignFeedbackResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Verify Label</h2>
+          <input type="text" id="adminToken4" placeholder="JWT Token" required>
+          <input type="text" id="labelIdToVerify" placeholder="Label ID" required>
+          <select id="verificationStatus">
+            <option value="">Select Status</option>
+            <option value="VERIFIED">Verified</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+          <textarea id="verificationNotes" placeholder="Notes (optional)"></textarea>
+          <button onclick="verifyLabel()">Verify Label</button>
+          <div id="verifyLabelResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Restrict Annotator</h2>
+          <input type="text" id="adminToken5" placeholder="JWT Token" required>
+          <input type="email" id="restrictEmail" placeholder="Annotator Email" required>
+          <textarea id="restrictReason" placeholder="Reason for Restriction"></textarea>
+          <button onclick="restrictAnnotator()">Restrict Annotator</button>
+          <div id="restrictResult" class="result"></div>
+        </div>
+
+        <div class="card">
+          <h2>Update Map with Label</h2>
+          <input type="text" id="adminToken6" placeholder="JWT Token" required>
+          <input type="text" id="updateLabelId" placeholder="Label ID" required>
+          <button onclick="updateMapWithLabel()">Update Map</button>
+          <div id="updateMapResult" class="result"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>✓ BanRAP Backend API v1.0.0 | Environment: Development</p>
+      <p>API Base URL: <code>http://localhost:5000</code></p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["windows", "debian-openssl-3.0.x", "native"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core User Model
+model User {
+  email                String          @id @unique
+  name                 String
+  phone                String          @unique
+  password             String
+  role                 Role
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  // Relations
+  traveller            Traveller?
+  annotator            Annotator?
+  admin                Admin?
+  feedbacks            Feedback[]
+  notifications        Notification[]
+
+  @@map("users")
+}
+
+enum Role {
+  TRAVELLER
+  ANNOTATOR
+  ADMIN
+}
+
+// Traveller Model
+model Traveller {
+  travellerID          String          @id @default(cuid())
+  email                String          @unique
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  // Foreign Key
+  user                 User            @relation(fields: [email], references: [email], onDelete: Cascade)
+
+  @@map("travellers")
+}
+
+// Annotator Model
+model Annotator {
+  annotatorID          String          @id @default(cuid())
+  email                String          @unique
+  workArea             String?
+  penaltyScore         Int             @default(0)
+  isActive             Boolean         @default(true)
+  isSuspended          Boolean         @default(false)
+  suspensionRemarks    String?         // Admin training/suspension remarks
+  suspendedAt          DateTime?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  // Foreign Key
+  user                 User            @relation(fields: [email], references: [email], onDelete: Cascade)
+  
+  // Relations
+  roads                Road[]
+  labels               Label[]
+
+  @@map("annotators")
+}
+
+// Admin Model
+model Admin {
+  adminID              String          @id @default(cuid())
+  email                String          @unique
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  // Foreign Key
+  user                 User            @relation(fields: [email], references: [email], onDelete: Cascade)
+  
+  // Relations
+  roads                Road[]
+  labelVerifications   Label[]         @relation("AdminVerifications")
+  labelReviews         LabelReview[]   @relation("ReviewAdmin")
+
+  @@map("admins")
+}
+
+// OTP Model (Temporary - no FK constraint since OTP is created before user exists)
+model Otp {
+  otpID                String          @id @default(cuid())
+  phone                String
+  code                 String
+  email                String          @db.Text
+  createdAt            DateTime        @default(now())
+  expiryAt             DateTime
+  
+  @@map("otps")
+  @@index([email])  // Index for faster lookups during OTP verification
+}
+
+// Road Model
+model Road {
+  roadID               String          @id @default(cuid())
+  roadName             String
+  rStartCoord          String          // JSON format: {lat, lng}
+  rEndCoord            String          // JSON format: {lat, lng}
+  isVerified           Boolean         @default(false)
+  riskScore            Float?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  // Foreign Keys
+  annotatorID          String
+  annotator            Annotator       @relation(fields: [annotatorID], references: [annotatorID])
+  adminID              String?
+  admin                Admin?          @relation(fields: [adminID], references: [adminID])
+
+  // Relations
+  segments             RoadSegment[]
+  starRatings          StarRating[]
+  feedbacks            Feedback[]
+
+  @@map("roads")
+}
+
+// Road Segment Model
+model RoadSegment {
+  segmentID            String          @id @default(cuid())
+  sStartCoord          String          // JSON format: {lat, lng}
+  sEndCoord            String          // JSON format: {lat, lng}
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  // Foreign Keys
+  roadID               String
+  road                 Road            @relation(fields: [roadID], references: [roadID], onDelete: Cascade)
+
+  // Relations
+  labels               Label[]
+  starRatings          StarRating[]
+  feedbacks            Feedback[]
+
+  @@map("road_segments")
+}
+
+// Label Model (Parent for Roadside, Intersection, Speed)
+model Label {
+  labelID              String          @id @default(cuid())
+  latitude             Float?
+  longitude            Float?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  isVerified           Boolean         @default(false)
+  verifiedAt           DateTime?
+
+  // Foreign Keys
+  segmentID            String
+  segment              RoadSegment     @relation(fields: [segmentID], references: [segmentID], onDelete: Cascade)
+  annotatorID          String
+  annotator            Annotator       @relation(fields: [annotatorID], references: [annotatorID])
+  adminID              String?
+  admin                Admin?          @relation("AdminVerifications", fields: [adminID], references: [adminID])
+
+  // Relations
+  roadside             Roadside?
+  intersection         Intersection?
+  speed                Speed?
+  review               LabelReview?
+
+  @@map("labels")
+}
+
+// Roadside Model
+model Roadside {
+  roadsideID           String          @id @default(cuid())
+  leftObject           String?         // Safety barrier metal, concrete, tree, pole, no object
+  rightObject          String?         // Safety barrier metal, concrete, tree, pole, no object
+  distanceObject       String?         // 0-1, 1-5, 5-10, 10+
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  // Foreign Key
+  labelID              String          @unique
+  label                Label           @relation(fields: [labelID], references: [labelID], onDelete: Cascade)
+
+  @@map("roadsides")
+}
+
+// Intersection Model
+model Intersection {
+  intersectionID       String          @id @default(cuid())
+  type                 String?         // 4+ leg, 4+ leg signalised, 3+ leg, Roundabout, 3+ leg signalised, Railway crossing, Merge lane
+  quality              String?         // Poor, Adequate, Not applicable
+  channelisation       String?         // Not present, Present
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  // Foreign Key
+  labelID              String          @unique
+  label                Label           @relation(fields: [labelID], references: [labelID], onDelete: Cascade)
+
+  @@map("intersections")
+}
+
+// Speed Model
+model Speed {
+  speedID              String          @id @default(cuid())
+  speedLimit           String?         // present, not present
+  management           String?         // 20-100 separate buttons for interval 10
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  // Foreign Key
+  labelID              String          @unique
+  label                Label           @relation(fields: [labelID], references: [labelID], onDelete: Cascade)
+
+  @@map("speeds")
+}
+
+// Star Rating Model
+model StarRating {
+  ratingID             String          @id @default(cuid())
+  ratingValue          Int             // 1-5
+  riskScore            Float
+  safetyScore          Float?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  // Foreign Keys
+  segmentID            String
+  segment              RoadSegment     @relation(fields: [segmentID], references: [segmentID], onDelete: Cascade)
+  roadID               String
+  road                 Road            @relation(fields: [roadID], references: [roadID], onDelete: Cascade)
+
+  // Relations
+  navigationRoutes     NavigationRoute[]
+
+  @@map("star_ratings")
+}
+
+// Navigation Route Model
+model NavigationRoute {
+  routeID              String          @id @default(cuid())
+  pathGeometry         String          // JSON format: array of {lat, lng}
+  distance             Float
+  eta                  Float           // in minutes
+  safetyETA            Float?          // adjusted ETA based on safety
+  createdAt            DateTime        @default(now())
+
+  // Foreign Key
+  ratingID             String
+  rating               StarRating      @relation(fields: [ratingID], references: [ratingID], onDelete: Cascade)
+
+  @@map("navigation_routes")
+}
+
+// Feedback/Complaint Model
+model Feedback {
+  feedbackID           String          @id @default(cuid())
+  title                String
+  description          String
+  imageURL             String?
+  coordinates          String          // JSON format: {lat, lng}
+  status               FeedbackStatus  @default(PENDING)
+  feedbackType         FeedbackType    @default(COMPLAINT)
+  priority             Int             @default(0)
+  assignedAnnotatorID  String?
+  resolvedLabelID      String?         // Link to the new label that resolved this complaint
+  adminRemarks         String?
+  annotatorRemarks     String?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  resolvedAt           DateTime?
+
+  // Foreign Keys
+  email                String
+  user                 User            @relation(fields: [email], references: [email], onDelete: Cascade)
+  segmentID            String?
+  segment              RoadSegment?    @relation(fields: [segmentID], references: [segmentID], onDelete: SetNull)
+  roadID               String?
+  road                 Road?           @relation(fields: [roadID], references: [roadID], onDelete: SetNull)
+
+  @@map("feedbacks")
+}
+
+enum FeedbackStatus {
+  PENDING
+  REVIEWED
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum FeedbackType {
+  FEEDBACK
+  COMPLAINT
+  SUGGESTION
+}
+
+// Label Review Model (for tracking admin review process)
+model LabelReview {
+  reviewID             String          @id @default(cuid())
+  status               ReviewStatus    @default(PENDING)
+  remarks              String?
+  approvedAt           DateTime?
+  rejectedAt           DateTime?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  // Foreign Keys
+  labelID              String          @unique
+  label                Label           @relation(fields: [labelID], references: [labelID], onDelete: Cascade)
+  adminID              String?
+  admin                Admin?          @relation("ReviewAdmin", fields: [adminID], references: [adminID])
+
+  @@map("label_reviews")
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Notification Model
+model Notification {
+  notificationID       String          @id @default(cuid())
+  message              String
+  type                 String          @default("INFO")
+  isRead               Boolean         @default(false)
+  metadata             String?         // JSON format for feedbackID, labelID, coordinates, etc.
+  createdAt            DateTime        @default(now())
+
+  // Foreign Key
+  email                String
+  user                 User            @relation(fields: [email], references: [email], onDelete: Cascade)
+
+  @@map("notifications")
+}
